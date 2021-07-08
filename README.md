@@ -1,1 +1,1 @@
-# SRA_Tabby's_Star_Project
+# SRA Tabby's Star Project
