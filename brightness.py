@@ -20,7 +20,7 @@ def inst_mag(source_counts, sky_counts, exp_time=EXPOSURE_TIME, A=100000):
     # A is used to distinguish instrumental magnitudes and apparent magnitudes
     return A - 2.5 * np.log10((source_counts - sky_counts)/exp_time)
 
-hdu_list = fits.open('data/tfn0m410-kb98-20210707-0126-e91.fits.fz')
+hdu_list = fits.open('./data/tfn0m410-kb98-20210709-0151-e91.fits.fz')
 im = hdu_list[1].data
 
 ceny = int(len(im)/2)
