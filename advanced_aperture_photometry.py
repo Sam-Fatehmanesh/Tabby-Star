@@ -9,6 +9,7 @@ from photutils import CircularAperture
 from photutils.aperture import aperture_photometry
 import matplotlib.pyplot as plt
 from matplotlib.colors import *
+import scipy.optimize as opt
 from glob import glob
 
 import math
@@ -102,6 +103,9 @@ def inst_mag(flux, flux_error, exposure_time):
     var_inst_mag = var_ft * (2.5/ft/np.log(10))**2
     return magnitude, np.sqrt(var_inst_mag)
 
+def mag_to_flux(magnitude):
+    return 10**(0.4*magnitude)
+
 # Putting all the above functions together:
 def process_image(filepath_to_e91_file, star_coords, comparison_star_coords, x_limits, y_limits):
     im, uncertainty_im, exposure_time, observation_time = load_image(filepath_to_e91_file)
@@ -117,7 +121,8 @@ all_images = glob('./data/*e91*')
 star_coords = {'x': 1530, 'y':   1030, 'r': 100} # approximate location of Tabby's star
 # comparison_star_coords = {'x': [1840], 'y': [910], 'r': [200]} #bottom right
 # comparison_star_coords = {'x': [1160], 'y': [1130], 'r': [200]} #top left
-comparison_star_coords = {'x': [1840,300], 'y': [910,1770], 'r': [200,200]}
+comparison_star_coords = {'x': [1840,300], 'y': [910,1770], 'r': [200,200]} # TYC 3162-879-1 (11.35) and HD 191224 (9.49) in V filter
+comparison_magnitude = np.log10(np.average([mag_to_flux(11.35), mag_to_flux(9.49)]))
 # approximate locations of the comparison stars. If more then one star then
 # give the x, y coords in order. so {'x': [xcoord of star 1, xcoord of star 2], 'y': [ycoord of star 1, ycoord of star 2]}
 
@@ -139,10 +144,10 @@ tabby_results = Table(output)
 print(tabby_results)
 
 plt.figure()
-plt.errorbar((tabby_results['time'].jd - np.min(tabby_results['time'].jd))*24, tabby_results['mag'],
+plt.errorbar((tabby_results['time'].jd - np.min(tabby_results['time'].jd))*24, tabby_results['mag'] + comparison_magnitude,
              yerr=tabby_results['mag_error'], ls='none', marker='o', markersize=2, color='k')
 plt.xlabel('Time since first observation (hours)')
-plt.ylabel('Magnitude of Tabby\'s Star- Magnitude of comparison star')
+plt.ylabel('Apparent Magnitude of Tabby\'s Star- Magnitude of comparison star')
 plt.title('Light Curve of Tabby\'s Star')
 ax = plt.gca()
 ax.set_ylim(ax.get_ylim()[::-1])
