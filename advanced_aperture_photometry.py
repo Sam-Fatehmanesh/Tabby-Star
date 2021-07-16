@@ -35,7 +35,7 @@ def load_image(filepath):
 
 
 def find_stars(
-    im, uncertainty_im, minimum_pixel_size_of_stars=10, minimum_signal_to_noise=5
+    im, uncertainty_im, minimum_pixel_size_of_stars=15, minimum_signal_to_noise=5 #15 for our data 10 for archival
 ):
     signal_to_noise_image = im / uncertainty_im
 
@@ -227,27 +227,31 @@ for fpath in all_images:
 
 print(len(baddies))
 print(baddies)
-# tabby_results = Table(output)
-# print(tabby_results)
 
-# filepath = "light_curve.csv"
-# tabby_results.write(filepath, overwrite=True)
+tabby_results = Table(output)
+print(tabby_results)
+data_file = 'our_data.csv'
+tabby_results.write(data_file, format='csv', overwrite=True)
 
-# plt.figure()
-# plt.errorbar(
-#     (tabby_results["time"].jd - np.min(tabby_results["time"].jd)), #*24,
-#     tabby_results["mag"] + comparison_magnitude,
-#     yerr=tabby_results["mag_error"],
-#     ls="None",
-#     marker="o",
-#     markersize=2,
-#     color="k",
-# )  # connecting the points is not standard in astronomy
-# plt.xlabel("Time since first observation (days)")
-# plt.ylabel("Apparent Magnitude of Tabby's Star")
-# # plt.title('Light Curve of Tabby\'s Star') put in captions of paper
-# ax = plt.gca()
-# ax.set_ylim(ax.get_ylim()[::-1])
-# plt.tight_layout()
-# # set font to latex computer modern
-# plt.show()
+
+plt.figure()
+plt.rcParams["font.family"] = "Georgia"
+plt.rcParams["font.size"] = "20"
+plt.errorbar(
+    (tabby_results["time"].jd - np.min(tabby_results["time"].jd)), #*24,
+    tabby_results["mag"] + comparison_magnitude,
+    yerr=tabby_results["mag_error"],
+    ls="None",
+    marker="o",
+    markersize=2,
+    color="k",
+)  # connecting the points is not standard in astronomy
+plt.xlabel("Time since first observation (days)")
+plt.ylabel("Apparent Magnitude of Tabby's Star")
+# plt.title('Light Curve of Tabby\'s Star') put in captions of paper
+ax = plt.gca()
+ax.set_ylim(ax.get_ylim()[::-1])
+plt.tight_layout()
+
+# set font to latex computer modern
+plt.show()
