@@ -20,21 +20,35 @@ import math
 def mag_to_flux(magnitude):
     return 10 ** (-0.4 * magnitude)
 
+#V FILTER
+# comparison_magnitude = -2.5 * np.log10(
+#     np.average([mag_to_flux(11.35), mag_to_flux(9.49)])
+# )
+
+# R FILTER
 comparison_magnitude = -2.5 * np.log10(
-    np.average([mag_to_flux(11.35), mag_to_flux(9.49)])
+    np.average([mag_to_flux(10.880), mag_to_flux(10.5)])
 )
 
-tabby_results = Table.read('./our_data.csv', format='csv')
+tabby_results = Table.read('./archival_with.csv', format='csv')
 # change each time to astropy.Time
-tabby_results['time'] = Time(tabby_results['time'], format='jd')
+tabby_results['time'] = Time(tabby_results['time'])
 #for i in range(len(tabby_results["time"])):
 #    tabby_results['time'][i] = Time(tabby_results['time'][i])[0]
 
+to_remove = []
 print(tabby_results)
-data_file = 'our_data.csv'
-#data_file = 'archival_data.csv'
-tabby_results.write(data_file, format='csv', overwrite=True)
+threshold = 0.2
 
+for i in range(len(tabby_results['mag_error'])):
+    # print(tabby_results['mag_error'][i])
+    if tabby_results['mag_error'][i] > threshold:
+       # del tabby_results[i] iterator error
+       to_remove.insert(0, i) #sorted backwards
+
+for i in to_remove:
+    print(i,tabby_results['mag_error'][i])
+    del tabby_results[i]
 
 plt.figure()
 plt.rcParams["font.family"] = "Georgia"
