@@ -6,6 +6,7 @@ from astropy.table import vstack
 from astropy.visualization import simple_norm
 from photutils import DAOStarFinder
 from photutils import CircularAperture
+from photutils.background import Background2D
 from photutils.aperture import aperture_photometry
 import matplotlib.pyplot as plt
 from matplotlib.colors import *
@@ -35,7 +36,7 @@ def load_image(filepath):
 
 
 def find_stars(
-    im, uncertainty_im, minimum_pixel_size_of_stars=15, minimum_signal_to_noise=5 #15 for our data 10 for archival
+    im, uncertainty_im, minimum_pixel_size_of_stars=10, minimum_signal_to_noise=5 #15 for our data 10 for archival
 ):
     signal_to_noise_image = im / uncertainty_im
 
@@ -78,7 +79,9 @@ def restrict_sources_to_within_box(all_sources, x_limits=(0, 3000), y_limits=(0,
 def ap_photometry(sources, im, uncertainty_im, aperture_pixel_radius=30.0):
     positions = [(s["xcentroid"], s["ycentroid"]) for s in sources]
     aperture = CircularAperture(positions, r=aperture_pixel_radius)
-    phot_table = aperture_photometry(im, aperture, error=uncertainty_im)
+    phot_table = aperture_photometry(im - Background2D(im, [len(im), len(im[0])]).background, aperture, error=uncertainty_im)
+    # phot_table = aperture_photometry(im, aperture, error=uncertainty_im)
+    # print(phot_table)
     phot_table.sort("aperture_sum", reverse=True)
     return phot_table
 
@@ -221,8 +224,9 @@ for fpath in all_images:
         output["mag"].append(mag)
         output["mag_error"].append(mag_error)
         output["time"].append(observation_time)
-    except Exception:
+    except Exception as e:
         print("ALERT ALERT ALERT ALERT ALERT ", str(fpath))
+        print(type(e), e)
         baddies.append(fpath)
 
 print(len(baddies))
@@ -230,8 +234,10 @@ print(baddies)
 
 tabby_results = Table(output)
 print(tabby_results)
-data_file = 'our_data.csv'
+data_file = 'archival_data.csv'
+#data_file = 'archival_data.csv'
 tabby_results.write(data_file, format='csv', overwrite=True)
+
 
 
 plt.figure()
